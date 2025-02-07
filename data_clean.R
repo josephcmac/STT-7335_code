@@ -249,9 +249,67 @@ emotion_dictionary <- list(
       1.2, 1.3, 1.4, 1.5, 1.4, 1.1, 1.6, 1.4, 1.0, 1.3, 
       1.0, 0.8, 1.2, 1.1, 1.1
     )
+  ),
+  confusion = data.frame(
+    word = c("confused", "puzzled", "perplexed", "baffled", "bewildered",
+             "mystified", "uncertain", "unsure", "incoherent", "vague", 
+             "ambiguous", "unclear", "disoriented", "hesitant", "foggy",
+             "tangled", "indecisive", "lost"),
+    weight = c(
+      1.0, 1.1, 1.2, 1.3, 1.2,
+      1.1, 0.8, 0.7, 1.0, 0.7,
+      1.0, 0.7, 1.1, 0.6, 0.8,
+      1.2, 0.9, 1.0
+    )
+  ),
+  anger = data.frame(
+    word = c("angry", "irate", "furious", "rage", "outraged", "annoyed", 
+             "irritated", "enraged", "resentful", "indignant", "fuming", 
+             "cross", "offended"),
+    weight = c(
+      1.0, 1.1, 1.5, 1.3, 1.4, 0.8, 
+      0.9, 1.4, 1.2, 1.1, 1.3,
+      0.7, 0.8
+    )
+  ),
+  fear = data.frame(
+    word = c("fear", "afraid", "scared", "terrified", "frightened", 
+             "horrified", "petrified", "nervous", "anxious", "dread", 
+             "panic", "apprehensive", "alarmed", "startled"),
+    weight = c(
+      1.0, 1.1, 1.2, 1.4, 1.2, 
+      1.3, 1.4, 1.0, 1.0, 1.2,
+      1.3, 1.0, 1.0, 1.1
+    )
+  ),
+  surprise = data.frame(
+    word = c("surprise", "astonished", "amazed", "startled", "shocked", 
+             "stunned", "astounded", "bewildered", "flabbergasted", 
+             "taken aback"),
+    weight = c(
+      1.0, 1.1, 1.2, 1.3, 1.3,
+      1.2, 1.4, 1.2, 1.5,
+      1.2
+    )
+  ),
+  disgust = data.frame(
+    word = c("disgust", "disgusted", "revolted", "repulsed", "nauseated", 
+             "loathing", "revulsion", "sickened", "appalled", "grossed"),
+    weight = c(
+      1.0, 1.1, 1.3, 1.2, 1.2,
+      1.3, 1.2, 1.1, 1.3, 1.0
+    )
+  ),
+  hope = data.frame(
+    word = c("hope", "hopeful", "optimistic", "aspire", "longing", 
+             "bright", "promising", "upbeat", "encouraged", "sanguine"),
+    weight = c(
+      1.0, 1.1, 1.2, 1.0, 0.8,
+      1.0, 1.1, 1.0, 1.1, 1.2
+    )
   )
-  # (Similarly define other emotions in the dictionary)
 )
+
 
 # -----------------------
 # 3) Helper sentiment functions
@@ -295,15 +353,25 @@ get_sentiment_bing <- function(poem_text) {
 }
 
 get_sentiment_nrc_ratio <- function(poem_text) {
+  library(dplyr)
+  library(tidytext)
+  
+  # Convert poem to tibble of words
   words <- tibble(text = poem_text) %>%
     unnest_tokens(word, text)
   
+  # Get NRC lexicon and keep only positive/negative
   nrc <- get_sentiments("nrc") %>%
     filter(sentiment %in% c("negative", "positive"))
   
-  scored_words <- words %>% inner_join(nrc, by = "word")
+  # Join poem words with NRC, acknowledging many-to-many
+  scored_words <- words %>%
+    inner_join(nrc, by = "word", relationship = "many-to-many")
+  
+  # If none matched, return 0
   if (nrow(scored_words) == 0) return(0)
   
+  # Count how many times each sentiment occurs
   sentiment_counts <- scored_words %>%
     count(sentiment)
   
@@ -312,9 +380,10 @@ get_sentiment_nrc_ratio <- function(poem_text) {
   if (length(negatives) == 0) negatives <- 0
   if (length(positives) == 0) positives <- 0
   
-  net_sentiment <- (positives - negatives)
+  net_sentiment <- positives - negatives
   total_matched <- positives + negatives
   normalized_score <- net_sentiment / total_matched
+  
   return(normalized_score)
 }
 
