@@ -69,7 +69,7 @@ process_folder_recursively <- function(FUN, input_dir, output_dir, key) {
   message("All files processed from '", input_dir, "' to '", output_dir, "'.")
 }
 
-key <-"Password Here"
+key <-"fsd1&1f*Rk82&^7r#mREWWewl"
 
 process_folder_recursively(
   FUN        = encrypt_file,      # the function to use
