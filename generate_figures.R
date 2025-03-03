@@ -104,7 +104,7 @@ corr_plot_fr <- ggcorrplot(
   lab_size = 3,
   method   = "square",    # Forme des cases
   colors   = c("#6D9EC1", "white", "#E46726"), # Couleurs en dégradé (faible, moyen, fort)
-  title    = "Corrélation entre les émotions (en français)",
+  title    = "Corrélation entre les émotions",
   ggtheme  = theme_minimal()
 )
 

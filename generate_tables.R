@@ -78,12 +78,12 @@ df_summary_factor_fr <- df_verses_fr %>%
 
 # Écrire les résumés dans des fichiers texte
 sink("tables/summary_numeric.txt")
-cat("=== Résumé des variables numériques (en français) ===\n")
+cat("=== Résumé des variables numériques ===\n")
 print(df_summary_numeric_fr)
 sink()
 
 sink("tables/summary_factor.txt")
-cat("=== Résumé des variables qualitatives (en français) ===\n")
+cat("=== Résumé des variables qualitatives ===\n")
 print(df_summary_factor_fr)
 sink()
 
@@ -113,7 +113,7 @@ summary_table_latex_fr <- kable(
   format   = "latex",
   booktabs = TRUE,
   digits   = 2,  # Arrondir à 2 décimales
-  caption  = "Variables numériques : statistiques récapitulatives (en français)",
+  caption  = "Variables numériques : statistiques récapitulatives",
   label    = "tab:summaryStatsFR"
 ) %>%
   kable_styling(latex_options = c("striped", "scale_down"))
@@ -121,4 +121,4 @@ summary_table_latex_fr <- kable(
 # Exporter le tableau en LaTeX
 cat(summary_table_latex_fr, file = "tables/summary_table.tex")
 
-message("Les tableaux ont été générés dans le dossier 'tables' avec des noms de variables en français.")
+message("Les tableaux ont été générés dans le dossier 'tables' avec des noms de variables.")
