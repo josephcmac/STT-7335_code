@@ -133,7 +133,7 @@ heatmap_cor_fr <- ggplot(cor_data_fr, aes(x = Emotion1, y = Emotion2, fill = Cor
     midpoint  = 0
   ) +
   labs(
-    title = "Carte de chaleur des corrélations entre émotions (en français)",
+    title = "Carte de chaleur des corrélations entre émotions",
     x     = "",
     y     = ""
   ) +
