@@ -112,3 +112,152 @@ ggsave(
   dpi      = 300
 )
 
+
+################################################################################
+# 8. Petit multiple d’histogrammes pour toutes les variables explicatives numériques
+#    (en excluant "Anticipation")
+################################################################################
+
+# 8a. Identifier les colonnes numériques, sauf Anticipation
+numeric_vars <- df_verses_fr %>%
+  select(where(is.numeric)) %>%
+  select(-Anticipation) %>% 
+  names()
+
+numeric_vars <- setdiff(numeric_vars, c("verse", "poet_id", "n_words"))
+
+# 8b. Passer en format "long" pour ggplot
+df_numeric_long <- df_verses_fr %>%
+  select(all_of(numeric_vars)) %>%
+  pivot_longer(
+    cols      = everything(),
+    names_to  = "Variable",
+    values_to = "Valeur"
+  )
+
+# 8c. Créer le graphique
+hist_all_explicatives <- ggplot(df_numeric_long, aes(x = Valeur)) +
+  geom_histogram(fill = "steelblue", color = "white", bins = 30) +
+  facet_wrap(~ Variable, scales = "free", ncol = 3) +
+  scale_y_log10() +
+  theme_minimal() +
+  labs(
+    title = "Histogrammes des variables explicatives (émotions)",
+    x = "Valeur",
+    y = "Effectif"
+  )
+
+# 8d. Sauvegarder la figure
+ggsave(
+  filename = "figures/hist_all_explicatives.png",
+  plot     = hist_all_explicatives,
+  width    = 9,
+  height   = 6,
+  dpi      = 300
+)
+
+################################################################################
+# Code R pour générer des tables de fréquences d'Anticipation (0,1,2,3) 
+# par variables catégorielles
+################################################################################
+
+library(dplyr)
+library(knitr)
+
+# Supposez que df_verses_fr est déjà chargé et contient les colonnes :
+#   - Anticipation (numérique)
+#   - Sexe, Période, Suicidaire, heterosexual
+
+# 0. Créer le dossier "tables" s'il n'existe pas
+if (!dir.exists("tables")) dir.create("tables")
+
+# 1. Filtrer les données pour ne garder que Anticipation ∈ {0,1,2,3}
+df_sub <- df_verses_fr %>%
+  filter(Anticipation %in% c(0,1,2,3))
+
+################################################################################
+# Table par Sexe
+################################################################################
+table_sexe_counts <- df_sub %>%
+  group_by(Sexe) %>%
+  summarise(
+    `Valeur_0` = sum(Anticipation == 0),
+    `Valeur_1` = sum(Anticipation == 1),
+    `Valeur_2` = sum(Anticipation == 2),
+    `Valeur_3` = sum(Anticipation == 3)
+  )
+
+kable_sexe_counts <- kable(
+  table_sexe_counts,
+  format   = "latex",
+  booktabs = TRUE,
+  caption  = "Nombre de vers ayant Anticipation = 0,1,2,3 selon le Sexe."
+)
+
+cat(kable_sexe_counts, file = "tables/table_sexe_counts.tex")
+
+
+################################################################################
+# Table par Période
+################################################################################
+table_periode_counts <- df_sub %>%
+  group_by(Période) %>%
+  summarise(
+    `Valeur_0` = sum(Anticipation == 0),
+    `Valeur_1` = sum(Anticipation == 1),
+    `Valeur_2` = sum(Anticipation == 2),
+    `Valeur_3` = sum(Anticipation == 3)
+  )
+
+kable_periode_counts <- kable(
+  table_periode_counts,
+  format   = "latex",
+  booktabs = TRUE,
+  caption  = "Nombre de vers ayant Anticipation = 0,1,2,3 selon la Période."
+)
+
+cat(kable_periode_counts, file = "tables/table_periode_counts.tex")
+
+
+################################################################################
+# Table par Suicidaire
+################################################################################
+table_suicidaire_counts <- df_sub %>%
+  group_by(Suicidaire) %>%
+  summarise(
+    `Valeur_0` = sum(Anticipation == 0),
+    `Valeur_1` = sum(Anticipation == 1),
+    `Valeur_2` = sum(Anticipation == 2),
+    `Valeur_3` = sum(Anticipation == 3)
+  )
+
+kable_suicidaire_counts <- kable(
+  table_suicidaire_counts,
+  format   = "latex",
+  booktabs = TRUE,
+  caption  = "Nombre de vers ayant Anticipation = 0,1,2,3 selon l'indicateur Suicidaire."
+)
+
+cat(kable_suicidaire_counts, file = "tables/table_suicidaire_counts.tex")
+
+
+################################################################################
+# Table par heterosexual
+################################################################################
+table_heterosexual_counts <- df_sub %>%
+  group_by(heterosexual) %>%
+  summarise(
+    `Valeur_0` = sum(Anticipation == 0),
+    `Valeur_1` = sum(Anticipation == 1),
+    `Valeur_2` = sum(Anticipation == 2),
+    `Valeur_3` = sum(Anticipation == 3)
+  )
+
+kable_heterosexual_counts <- kable(
+  table_heterosexual_counts,
+  format   = "latex",
+  booktabs = TRUE,
+  caption  = "Nombre de vers ayant Anticipation = 0,1,2,3 selon l'orientation sexuelle."
+)
+
+cat(kable_heterosexual_counts, file = "tables/table_heterosexual_counts.tex")
